@@ -39,13 +39,18 @@ class FMC_TEST():
                             'x-auth-access-token': self.access_token}
 
 
-        self.DEVICE_Dict = {}
+        self.DEVICE_Dict = {} # Mapping Name <-> ID
 
+        self.ACP_Dict = {} # Mapping Name <-> ID
+
+        self.Zone_Dict = {} # Mapping Name <-> ID
 
 
         self.Source_Object_NAME = []
         self.Source_Object_ID = []
         self.Source_Object_Dict = {}
+
+
 
     def Get_DeviceList(self):
         host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/devices/devicerecords"
@@ -65,7 +70,34 @@ class FMC_TEST():
         host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/policy/accesspolicies"
         response = requests.get(host_api_uri, headers=self.HEADER_JSON,verify=False)
         temp = json.loads(response.text)
-        print(temp)
+
+        acp_id_list = [temp['items'][num]['id'] for num in range(len(temp['items']))] # ACP UUID == Container UUID
+        acp_name_list = [temp['items'][num]['name'] for num in range(len(temp['items']))] # Device Name
+        for num in range(len(temp['items'])):
+            self.ACP_Dict[acp_name_list[num]] = acp_id_list[num]
+
+    def Show_ACP(self):
+        self.Get_ACP()
+        print(self.ACP_Dict.keys())
+
+
+    def Get_SecurityZone(self):
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/object/securityzones"
+        response = requests.get(host_api_uri, headers=self.HEADER_JSON,verify=False)
+        temp = json.loads(response.text)
+
+        zone_id_list = [temp['items'][num]['id'] for num in range(len(temp['items']))] # ACP UUID == Container UUID
+        zone_name_list = [temp['items'][num]['name'] for num in range(len(temp['items']))] # Device Name
+
+        for num in range(len(temp['items'])):
+            self.Zone_Dict[zone_name_list[num]] = zone_id_list[num]
+
+    def Show_SecurityZone(self):
+        self.Get_SecurityZone()
+        print(self.Zone_Dict.keys())
+
+        print(self.Zone_Dict['INSIDE'])
+        print(self.Zone_Dict['OUTSIDE'])
 
 
     def Create_ACP(self):
@@ -81,8 +113,81 @@ class FMC_TEST():
 
         host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/policy/accesspolicies"
         response = requests.post(host_api_uri, headers=self.HEADER_JSON,data=json.dumps(data),verify=False)
+        if response.status_code == 201 : print('{} is created successfully'.format(acp_name))
+
+    def Show_ACP_Rule(self):
+        self.Get_ACP()
+
+        # Container UUID
+        acp = input('input ACP ID :')
+        container_ID = self.ACP_Dict[acp]
+        print(container_ID)
+
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/policy/accesspolicies/" + container_ID + "/accessrules"
+
+        response = requests.get(host_api_uri, headers=self.HEADER_JSON,verify=False)
         print(response.status_code)
-        if response.status_code == 201 : print('success')
+        temp = json.loads(response.text)
+        print(temp)
+
+
+
+
+    def Test(self):
+        temp = []
+        for i in range(500):
+            a = {
+                  "action": "ALLOW",
+                  "enabled": 'true',
+                  "type": "AccessRule",
+                  "name": "Rule{}".format(i),
+                  "sendEventsToFMC": 'false',
+                  "id": "accessRuleUUID1",
+                  "sourceZones": {
+                    "objects": [
+                      {
+                        "name": "INSIDE",
+                        "id": "700407d4-283d-11ee-a3b1-c5374fdbb789",
+                        "type": "SecurityZone"
+                      }
+                    ]
+                  },
+                  "destinationZones": {
+                    "objects": [
+                      {
+                        "name": "OUTSIDE",
+                        "id": "998434a2-27c1-11ee-a3b1-c5374fdbb789",
+                        "type": "SecurityZone"
+                      }
+                    ]
+                  }
+            }
+
+            temp.append(a)
+
+            print(temp)
+
+        # Container UUID
+        acp = input('input ACP ID :')
+        container_ID = self.ACP_Dict[acp]
+        print(container_ID)
+
+        data = json.dumps(temp)
+
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/policy/accesspolicies/" + container_ID + "/accessrules?bulk=true&section=mandatory"
+
+        response = requests.post(host_api_uri,headers=self.HEADER_JSON,data=data,verify=False)
+
+        #print(response.status_code)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -145,8 +250,6 @@ class FMC_TEST():
         print(response.content)
         print(response.status_code)
 
-
-
     def Get_Object_ID(self):
         Object_UUID = []
         # GEt OBject ID
@@ -180,6 +283,7 @@ class FMC_TEST():
         response = requests.request("GET", host_api_uri, headers=headers, verify=False)
 
         a = json.loads(response.text)
+
 
         for i in a['items']:
             self.Source_Object_NAME.append(i['name'])
@@ -283,20 +387,30 @@ class FMC_TEST():
 
 # IP , ID , PW 입력하세요
 FMC = FMC_TEST('192.168.80.93','admin','Ringnet01!')
+
+FMC.Get_ACP()
 #FMC = FMC_TEST(input('FMC IP :'),input('Username :'),input('Password :'))
+
 
 while True:
     input_value = input('Show access token: t\n'
                         'Show device list: d\n'
                         'Show ACP: a\n'
+                        'Show Security_Zone : SZ\n'
+                        'Show ACP Rule : SAR\n'
+                        'TEST : T\n'
                         'Create ACP: CA\n'
                         'Exit : q\n'
                         'input :')
 
-
+    if input_value == 'SZ':
+        FMC.Show_SecurityZone()
     if input_value == 't':
         print(FMC.access_token)
-
+    if input_value == 'T':
+        FMC.Test()
+    if input_value == 'SAR':
+        FMC.Show_ACP_Rule()
     if input_value == 'q':
         break
 
@@ -304,7 +418,7 @@ while True:
         FMC.Get_DeviceList()
 
     if input_value == 'a':
-        FMC.Get_ACP()
+        FMC.Show_ACP()
 
     if input_value == 'CA':
         FMC.Create_ACP()
@@ -323,3 +437,30 @@ while True:
 
 
 
+
+{
+  "action": "ALLOW",
+  "enabled": false,
+  "type": "AccessRule",
+  "name": "Rule2",
+  "sendEventsToFMC": false,
+  "id": "accessRuleUUID1",
+  "sourceZones": {
+    "objects": [
+      {
+        "name": "INSIDE",
+        "id": "700407d4-283d-11ee-a3b1-c5374fdbb789",
+        "type": "SecurityZone"
+      }
+    ]
+  },
+  "destinationZones": {
+    "objects": [
+      {
+        "name": "OUTSIDE",
+        "id": "998434a2-27c1-11ee-a3b1-c5374fdbb789",
+        "type": "SecurityZone"
+      }
+    ]
+  }
+}
