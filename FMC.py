@@ -61,9 +61,28 @@ class FMC_TEST():
         print(self.DEVICE_Dict.keys())
 
 
+    def Get_ACP(self):
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/policy/accesspolicies"
+        response = requests.get(host_api_uri, headers=self.HEADER_JSON,verify=False)
+        temp = json.loads(response.text)
+        print(temp)
 
 
+    def Create_ACP(self):
+        acp_name = input("input ACP NAME: ")
 
+        data = {
+                  "type": "AccessPolicy",
+                  "name": acp_name,
+                  "defaultAction": {
+                    "action": "BLOCK"
+                  }
+                }
+
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/policy/accesspolicies"
+        response = requests.post(host_api_uri, headers=self.HEADER_JSON,data=json.dumps(data),verify=False)
+        print(response.status_code)
+        if response.status_code == 201 : print('success')
 
 
 
@@ -269,6 +288,8 @@ FMC = FMC_TEST('192.168.80.93','admin','Ringnet01!')
 while True:
     input_value = input('Show access token: t\n'
                         'Show device list: d\n'
+                        'Show ACP: a\n'
+                        'Create ACP: CA\n'
                         'Exit : q\n'
                         'input :')
 
@@ -282,6 +303,11 @@ while True:
     if input_value == 'd':
         FMC.Get_DeviceList()
 
+    if input_value == 'a':
+        FMC.Get_ACP()
+
+    if input_value == 'CA':
+        FMC.Create_ACP()
 
 
 
