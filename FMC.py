@@ -238,7 +238,7 @@ class FMC_TEST():
 
 
 
-    def Create_object(self):
+    def Create_object_host(self):
     #엑셀파일경로 입력하세요
         csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/test2.csv'
 
@@ -255,6 +255,29 @@ class FMC_TEST():
         print(host_payload)
 
         host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/object/hosts?bulk=true"
+        headers = {'Content-Type': 'application/json', 'x-auth-access-token': self.access_token}
+
+        response = requests.request("POST", host_api_uri, headers=headers, data=host_payload, verify=False)
+        print(response.content)
+
+
+    def Create_object_range(self):
+    #엑셀파일경로 입력하세요
+        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/test2.csv'
+
+        with open(csvFilePath, encoding='utf-8-sig') as csvf:
+           csvReader = csv.DictReader(csvf)
+
+           for rows in csvReader:
+              print(rows)
+              if rows['type'] == "Range":
+                 self.host.append(rows)
+
+        host_payload = json.dumps(self.host)
+
+        print(host_payload)
+
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/object/ranges?bulk=true"
         headers = {'Content-Type': 'application/json', 'x-auth-access-token': self.access_token}
 
         response = requests.request("POST", host_api_uri, headers=headers, data=host_payload, verify=False)
@@ -425,14 +448,18 @@ while True:
                         'Show ACP: a\n'
                         'Show Security_Zone : SZ\n'
                         'Show ACP Rule : SAR\n'
+                        'Create Hosts_Obj : CHO\n'
+                        'Create Ranges_Obj : CRO\n'
                         'TEST : T\n'
                         'Create ACP: CA\n'
                         'Exit : q\n'
                         'TEST2 :T2\n'
                         'input :')
 
-    if input_value == 'T2':
-        FMC.Create_object()
+    if input_value == 'CHO':
+        FMC.Create_object_host()
+    if input_value == 'CRO':
+        FMC.Create_object_range()
     if input_value == 'SZ':
         FMC.Show_SecurityZone()
     if input_value == 't':
