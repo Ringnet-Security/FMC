@@ -240,7 +240,7 @@ class FMC_TEST():
 
     def Create_object(self):
     #엑셀파일경로 입력하세요
-        csvFilePath = 'C:/Users/Myamori/PycharmProjects/2023_python/Test/test2.csv'
+        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/test2.csv'
 
         with open(csvFilePath, encoding='utf-8-sig') as csvf:
            csvReader = csv.DictReader(csvf)
@@ -428,8 +428,11 @@ while True:
                         'TEST : T\n'
                         'Create ACP: CA\n'
                         'Exit : q\n'
+                        'TEST2 :T2\n'
                         'input :')
 
+    if input_value == 'T2':
+        FMC.Create_object()
     if input_value == 'SZ':
         FMC.Show_SecurityZone()
     if input_value == 't':
