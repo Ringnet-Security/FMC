@@ -240,7 +240,7 @@ class FMC_TEST():
 
     def Create_object_host(self):
     #엑셀파일경로 입력하세요
-        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/test2.csv'
+        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/host_obj.csv'
 
         with open(csvFilePath, encoding='utf-8-sig') as csvf:
            csvReader = csv.DictReader(csvf)
@@ -263,7 +263,7 @@ class FMC_TEST():
 
     def Create_object_range(self):
     #엑셀파일경로 입력하세요
-        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/test2.csv'
+        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/range_obj.csv'
 
         with open(csvFilePath, encoding='utf-8-sig') as csvf:
            csvReader = csv.DictReader(csvf)
