@@ -6,6 +6,18 @@ import csv
 from openpyxl import Workbook
 from openpyxl import load_workbook
 
+import tkinter as tk
+import os,time
+import multiprocessing
+from tkinter import ttk
+from tkinter import scrolledtext
+
+from tkinter import Menu
+from tkinter import messagebox as msg
+from threading import Thread
+
+
+
 
 class FMC_TEST():
     def __init__(self,FMC_IP,FMC_USER,FMC_PASS):
@@ -135,12 +147,12 @@ class FMC_TEST():
 
     def Test(self):
         temp = []
-        for i in range(500):
+        for i in range(3):
             a = {
                   "action": "ALLOW",
                   "enabled": 'true',
                   "type": "AccessRule",
-                  "name": "Rule{}".format(i),
+                  "name": "A{}".format(i),
                   "sendEventsToFMC": 'false',
                   "id": "accessRuleUUID1",
                   "sourceZones": {
@@ -160,12 +172,28 @@ class FMC_TEST():
                         "type": "SecurityZone"
                       }
                     ]
-                  }
+                  },
+                "sourceNetworks": {
+                    "objects": [
+                        {
+                            "name": "8.8.8.8",
+                            "id": "00000000-0000-0ed3-0000-004294979088",
+                            "type": "Host"
+                        }
+                    ]
+                },
+                "destinationNetworks": {
+                    "objects": [
+                        {
+                            "name": "test",
+                            "id": "00000000-0000-0ed3-0000-004294994565",
+                            "type": "Host"
+                        }
+                    ]
+                }
             }
 
             temp.append(a)
-
-            print(temp)
 
         # Container UUID
         acp = input('input ACP ID :')
@@ -178,7 +206,7 @@ class FMC_TEST():
 
         response = requests.post(host_api_uri,headers=self.HEADER_JSON,data=data,verify=False)
 
-        #print(response.status_code)
+        print(response.content)
 
 
 
@@ -393,8 +421,7 @@ FMC.Get_ACP()
 
 
 while True:
-    input_value = input('Show access token: t\n'
-                        'Show device list: d\n'
+    input_value = input('Show device list: d\n'
                         'Show ACP: a\n'
                         'Show Security_Zone : SZ\n'
                         'Show ACP Rule : SAR\n'
@@ -438,29 +465,3 @@ while True:
 
 
 
-{
-  "action": "ALLOW",
-  "enabled": false,
-  "type": "AccessRule",
-  "name": "Rule2",
-  "sendEventsToFMC": false,
-  "id": "accessRuleUUID1",
-  "sourceZones": {
-    "objects": [
-      {
-        "name": "INSIDE",
-        "id": "700407d4-283d-11ee-a3b1-c5374fdbb789",
-        "type": "SecurityZone"
-      }
-    ]
-  },
-  "destinationZones": {
-    "objects": [
-      {
-        "name": "OUTSIDE",
-        "id": "998434a2-27c1-11ee-a3b1-c5374fdbb789",
-        "type": "SecurityZone"
-      }
-    ]
-  }
-}
