@@ -240,7 +240,7 @@ class FMC_TEST():
 
     def Create_object_host(self):
     #엑셀파일경로 입력하세요
-        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/host_obj.csv'
+        csvFilePath = 'C:/Users/ykk56/Git_Test/FMC/host_obj.csv'
 
         with open(csvFilePath, encoding='utf-8-sig') as csvf:
            csvReader = csv.DictReader(csvf)
@@ -263,7 +263,7 @@ class FMC_TEST():
 
     def Create_object_range(self):
     #엑셀파일경로 입력하세요
-        csvFilePath = 'C:/Users/Myamori/PycharmProjects/Ringnet_Security/range_obj.csv'
+        csvFilePath = 'C:/Users/ykk56/Git_Test/FMC/range_obj.csv'
 
         with open(csvFilePath, encoding='utf-8-sig') as csvf:
            csvReader = csv.DictReader(csvf)
@@ -283,6 +283,50 @@ class FMC_TEST():
         response = requests.request("POST", host_api_uri, headers=headers, data=host_payload, verify=False)
         print(response.content)
 
+    def Create_object_network(self):
+    #엑셀파일경로 입력하세요
+        csvFilePath = 'C:/Users/ykk56/Git_Test/FMC/network_obj.csv'
+
+        with open(csvFilePath, encoding='utf-8-sig') as csvf:
+           csvReader = csv.DictReader(csvf)
+
+           for rows in csvReader:
+              print(rows)
+              if rows['type'] == "Network":
+                 self.host.append(rows)
+
+        host_payload = json.dumps(self.host)
+
+        print(host_payload)
+
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/object/networks?bulk=true"
+        headers = {'Content-Type': 'application/json', 'x-auth-access-token': self.access_token}
+
+        response = requests.request("POST", host_api_uri, headers=headers, data=host_payload, verify=False)
+        print(response.content)
+
+
+    def Create_object_port(self):
+    #엑셀파일경로 입력하세요
+        csvFilePath = 'C:/Users/ykk56/Git_Test/FMC/port_obj.csv'
+
+        with open(csvFilePath, encoding='utf-8-sig') as csvf:
+           csvReader = csv.DictReader(csvf)
+
+           for rows in csvReader:
+
+
+             self.host.append(rows)
+
+        host_payload = json.dumps(self.host)
+
+        print(host_payload)
+
+        host_api_uri = "https://" + self.FMC_IP + "/api/fmc_config/v1/domain/" + self.DOMAIN_UUID + "/object/protocolportobjects?bulk=true"
+        headers = {'Content-Type': 'application/json', 'x-auth-access-token': self.access_token}
+
+        response = requests.request("POST", host_api_uri, headers=headers, data=host_payload, verify=False)
+        print(response.content)
 
     def Create_FtdNatRule(self):
 
@@ -437,9 +481,9 @@ class FMC_TEST():
 
 
 # IP , ID , PW 입력하세요
-FMC = FMC_TEST('192.168.80.93','admin','Ringnet01!')
+FMC = FMC_TEST('192.168.80.33','admin','Ringnet01!')
 
-FMC.Get_ACP()
+#FMC.Get_ACP()
 #FMC = FMC_TEST(input('FMC IP :'),input('Username :'),input('Password :'))
 
 
@@ -460,6 +504,10 @@ while True:
         FMC.Create_object_host()
     if input_value == 'CRO':
         FMC.Create_object_range()
+    if input_value == 'CNO':
+        FMC.Create_object_network()
+    if input_value == 'CPO':
+        FMC.Create_object_port()
     if input_value == 'SZ':
         FMC.Show_SecurityZone()
     if input_value == 't':
